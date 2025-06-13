@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\EmployeeResource;
 use App\Http\Services\EmployeeServices;
+use Illuminate\Support\Facades\Redis;
 use App\Traits\ApiResponse;
 
 class EmployeeController extends Controller
@@ -33,6 +34,7 @@ class EmployeeController extends Controller
     {
         $validatedReq = $req->validated();
         $dataCreated = $this->service->create($validatedReq);
+        Redis::set("data:" . $dataCreated->id, $dataCreated);
         return $this->successResponse(new EmployeeResource($dataCreated), 'Employee Created', 201);
     }
 
@@ -41,6 +43,7 @@ class EmployeeController extends Controller
         $validatedReq = $req->validated();
         $employee = $this->service->get($id);
         $updatedEmployee = $this->service->update($employee, $validatedReq);
+        Redis::set("data:" . $updatedEmployee->id, $updatedEmployee);
         return $this->successResponse(new EmployeeResource($updatedEmployee), 'Employee Updated');
     }
 
